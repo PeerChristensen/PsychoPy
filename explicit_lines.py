@@ -5,14 +5,14 @@
 #add sound files
 
 #import
-from psychopy.visual import Circle
+from psychopy.visual import Circle, ShapeStim, Line
 from psychopy import visual, event, core, sound, gui
 import random, os
 import numpy as np
 import csv
 
 #log
-log_path = '/Users/peerchristensen/Desktop/Projects/pitch_perception/Choice_logs/' 
+log_path = '/Users/peerchristensen/Desktop/PsPy/scripts/timeAge/timeAgeLogs/' 
 info = {'participant':'','age':'','language':"",'gender':['male', 'female']}
 if not gui.DlgFromDict(info, order=['participant', 'age', 'language', 'gender']).OK:      
     core.quit()  
@@ -27,74 +27,72 @@ win = visual.Window(fullscr=True,useRetina=True,allowGUI=True,monitor='testMonit
 win.update()
 
 #n trials
-nTrials=40
+nTrials=8
 #Visual stimuli
 black=[-1,-1,-1]
 leftPos= -300
 rightPos= 300
 
 #HEIGHT
-circleHIGH = Circle(win=win,units="pix",radius= 100, fillColor=black,lineColor=black,pos=[0,300],name="high")
-circleLOW = Circle(win=win,units="pix",radius= 100, fillColor=black,lineColor=black,pos=[0,-300],name="low")
+stimHIGH = Line(win, start=(-75,300), end=(75, 300),lineWidth=30,lineColor=black,name="high")
+stimLOW  = Line(win, start=(-75,-300), end=(75,-300),lineWidth=30,lineColor=black,name="low")
 #SIZE
 circleBIG = Circle(win=win,units="pix",radius= 200, fillColor=black,lineColor=black,pos=[0,0],name="big")
 circleSMALL = Circle(win=win,units="pix",radius= 50, fillColor=black,lineColor=black,pos=[0,0],name="small")
 #Visual stimulus lists
 
 completeList=[[circleSMALL, circleBIG],
-    [circleLOW, circleHIGH],[circleHIGH, circleSMALL],
-    [circleLOW, circleBIG]] * (nTrials/4)
+    [stimLOW, stimHIGH],[stimHIGH, circleSMALL],
+    [stimLOW, circleBIG]] * (nTrials/4)
 random.shuffle(completeList)
 
 #Auditory stimuli
-#highSound = sound.Sound('A',octave=5,sampleRate=44100,secs=0.8,stereo=True,name = "high")
-#lowSound  = sound.Sound('A',octave=2,sampleRate=44100,secs=0.8,stereo=True,name = "low")
-highSound = sound.Sound("/Users/peerchristensen/Desktop/PsPy/high_low_long/high_a4_long.wav",name = "high")
-lowSound = sound.Sound("/Users/peerchristensen/Desktop/PsPy/high_low_long/low_a1_long.wav",name = "low")
-
-
+highSound = sound.Sound('A',octave=4,sampleRate=44100,secs=1,stereo=True,name = "high")
+lowSound  = sound.Sound('A',octave=2,sampleRate=44100,secs=1,stereo=True,name = "low")
 completeSounds = [highSound,lowSound] * (nTrials/2)
 random.shuffle(completeSounds)
 
 for i in range(0,nTrials):
     trial=i+1
-    print(i)
     win.flip()
     core.wait(0.3)
     completeSounds[i].play()
     print(completeSounds[i].name)
-    core.wait(1)
+    core.wait(1.2)
     stimLeft=completeList[i][0]
     stimRight=completeList[i][1]
-    if stimLeft.name=="high":
-        stimLeft.pos = [-450,300]
-    elif stimLeft.name=="low":
-        stimLeft.pos = [-450,-300]
+    if stimLeft.name == "high":
+        stimLeft.start= [-650,300]
+        stimLeft.end= [-450,300]
+    elif stimLeft.name == "low":
+        stimLeft.start= [-650,-300]
+        stimLeft.end = [-450,-300]
     else:
         stimLeft.pos = [-450,0]
     if stimRight.name=="high":
-        stimRight.pos = [400,300]
+        stimRight.start = [350,300]
+        stimRight.end = [550,300]
     elif stimRight.name=="low":
-        stimRight.pos = [400,-300]
+        stimRight.start = [350,-300]
+        stimRight.end = [450,-300]
     else:
-        stimRight.pos = [400,0]
-    print(stimLeft.name)
-    print(stimRight.name)
+        stimRight.pos = [350,0]
     stimLeft.draw()
     stimRight.draw()
     win.flip()
     key = event.waitKeys(keyList=['s','k'])
-    if key[0] == "s":
+    if key == 's':
         choice = "left"
         choiceName = stimLeft.name
     else:
         choice = "right"
         choiceName = stimRight.name
-    print(key,choice,choiceName)
     row=info['participant'],info['language'],info['gender'],info['age'],trial,completeSounds[i].name,stimLeft.name,stimRight.name,choice,choiceName
     writer.writerow(row)
     core.wait(0.5)
-log.close()    
+
+
+    
 
 #pathSounds="/Users/peerchristensen/Desktop/PsPy/responseTaskSounds/"
 #sounds=os.listdir(pathSounds)
